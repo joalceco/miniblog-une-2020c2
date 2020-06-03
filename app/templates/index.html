@@ -1,5 +1,15 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>{{ user.username }}</h1>
+    <h1>Agenda de contactos</h1>
+    <a href="{{ url_for('post') }}">Nuevo Registro</a>
+    <div class="contacts">
+    {% for contact in contacts%}
+        <div>{{contact.first_name}}</div>
+        <div>{{contact.last_name}}</div>
+        <div>{{contact.email}}</div>
+        <div>{{contact.phone}}</div>
+        <div><a contact_id={{contact.id}} href="{{ url_for('delete_post', id=contact.id) }}" data-method="delete">Eliminar</a></div>
+    {% endfor %}
+    </div>
 {% endblock %}

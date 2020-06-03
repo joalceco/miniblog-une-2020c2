@@ -29,9 +29,13 @@ def load_user(id):
 class Post(db.Model):
     __tablename__="posts"
     id = db.Column(db.Integer,primary_key=True)
-    body = db.Column(db.String(280))
+    first_name = db.Column(db.String(50), index=True)
+    last_name = db.Column(db.String(100), index=True)
+    phone = db.Column(db.String(12))
+    email = db.Column(db.String(120), index=True, unique=True)
+    note = db.Column(db.String(280))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     users_id = db.Column(db.Integer, db.ForeignKey("users.id"))
 
     def __repr__(self):
-        return "<Post {}>".format(self.body)
+        return "<Post {}, email:{}>".format(self.body, self.email)
