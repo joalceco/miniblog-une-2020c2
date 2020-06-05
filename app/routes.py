@@ -10,7 +10,7 @@ from app.models import User, Post
 def index():
     if not current_user.is_authenticated:
         return redirect(url_for("login"))
-    contacts = Post.query.all() # pendiente
+    contacts = Post.query.filter_by(users_id = current_user.id).all()
     return render_template("index.html", contacts = contacts)
 
 
@@ -31,7 +31,38 @@ def login():
         return redirect("/index")
     return render_template("login.html", title="Login",form=form)
 
-@app.route("/post/delete/<int:id>", methods=["DELETE"])
+@app.route("/post/edit/<int:id>", methods=["POST"])
+@login_required #Falto importar
+def edit_post(id):
+    post = Post.query.filter_by(id=id).first()
+    if post:
+        if current_user.id == post.users_id:
+            pass
+            # Editar
+            form = PostForm()
+            if form.validate_on_submit():
+                post.first_name = form.first_name.data
+                post.last_name = form.last_name.data
+                post.phone = form.phone.data
+                post.email = form.email.data
+                post.note = form.note.data
+                db.session.add(post)
+                db.session.commit()
+                return redirect(url_for("index"))
+            form.first_name.data = post.first_name
+            form.last_name.data = post.last_name
+            form.phone.data = post.phone
+            form.email.data = post.email
+            form.note.data = post.note
+            form.submit.value  = "Editar"
+            return render_template("post.html", form=form, edit=True)
+        else:
+            flash("No tienes permisos para borrar este contacto")
+    else:
+        flash("El contacto no existe")
+    return redirect(url_for("index"))
+
+@app.route("/post/delete/<int:id>", methods=["POST"])
 @login_required #Falto importar
 def delete_post(id):
     post = Post.query.filter_by(id=id).first()
