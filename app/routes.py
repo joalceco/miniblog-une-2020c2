@@ -1,7 +1,7 @@
 from flask import render_template, flash, redirect, url_for
 from app import app
 from app import db
-from app.forms import LoginForm, PostForm
+from app.forms import LoginForm, PostForm, SignUpForm
 from flask_login import current_user, login_user, logout_user, login_required
 from app.models import User, Post
 
@@ -12,6 +12,30 @@ def index():
         return redirect(url_for("login"))
     contacts = Post.query.filter_by(users_id = current_user.id).all()
     return render_template("index.html", contacts = contacts)
+
+@app.route("/signup", methods=["GET", "POST"])
+def signup():
+    if current_user.is_authenticated:
+        return redirect(url_for("index"))
+    form = SignUpForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(username=form.username.data).first()
+        if user:
+            flash("El usario ya existe")
+            return redirect(url_for("signup"))
+        user = User.query.filter_by(email=form.email.data).first()
+        if user:
+            flash("El correo ya es utilizado")
+            return redirect(url_for("signup"))
+        user = User()
+        user.username = form.username.data
+        user.set_password(form.password.data)
+        user.email = form.email.data
+        db.session.add(user)
+        db.session.commit()
+        flash("Usuario creado exitosamente")
+        return redirect("/login")
+    return render_template("signup.html", title="Login",form=form)
 
 
 @app.route("/login", methods=["GET", "POST"])
